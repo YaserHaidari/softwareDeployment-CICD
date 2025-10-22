@@ -9,7 +9,7 @@ pipeline {
   }
 
   environment {
-    // IMAGE will be computed at runtime as EFFECTIVE_IMAGE; keep these as defaults
+
     IMAGE = "${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
     LOCAL_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
   }
@@ -18,16 +18,16 @@ pipeline {
     stage('Prepare') {
       steps {
         script {
-          // Determine tag: if user left IMAGE_TAG as 'latest', use BUILD_NUMBER for immutable tags
+
           def resolvedTag = params.IMAGE_TAG == 'latest' ? env.BUILD_NUMBER : params.IMAGE_TAG
           env.IMAGE_TAG = resolvedTag
 
-          // If user provided a full image via env DOCKER_BFLASK_IMAGE, use it; otherwise build from params
+
           def effective = env.DOCKER_BFLASK_IMAGE ?: "${params.DOCKERHUB_USER}/${params.IMAGE_NAME}:${resolvedTag}"
           env.EFFECTIVE_IMAGE = effective
           echo "Effective image will be: ${env.EFFECTIVE_IMAGE}"
 
-          // Determine credential id for registry (env DOCKER_REGISTRY_CREDS if present)
+
           env.REG_CRED_ID = env.DOCKER_REGISTRY_CREDS ?: 'dockerhub'
           echo "Using registry credential id: ${env.REG_CRED_ID}"
         }
@@ -75,9 +75,9 @@ pipeline {
 
     stage('Deploy to EC2') {
       steps {
-        // Use SSH private key from Jenkins credentials and pass it to ssh via -i so the pipeline doesn't require the ssh-agent plugin
+
         withCredentials([sshUserPrivateKey(credentialsId: 'EC2_SSH', keyFileVariable: 'EC2_KEY', usernameVariable: 'EC2_USER')]) {
-          // Compute SSH target: if EC2_HOST already contains user@host, use it; otherwise prepend the username from the credential
+
           script {
             def sshTarget = ''
             if (env.EC2_HOST?.contains('@')) {
@@ -87,7 +87,7 @@ pipeline {
             }
             env.SSH_TARGET = sshTarget
           }
-          // Pull image and restart container on remote host. Enable verbose ssh logging to surface connection/auth errors.
+
           sh '''
             set -x
             ssh -i "$EC2_KEY" -o StrictHostKeyChecking=no -o BatchMode=yes -vvv "$SSH_TARGET" \

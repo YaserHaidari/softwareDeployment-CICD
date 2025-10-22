@@ -10,5 +10,5 @@ COPY . /app
 
 EXPOSE 5000
 
-# Run the simple Flask app using the builtin server (suitable for dev/small apps)
+
 CMD ["python", "app.py"]
