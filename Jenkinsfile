@@ -37,7 +37,7 @@ pipeline {
       steps {
         script {
           echo 'Running lint (flake8) inside python container'
-          // Run lint inside an ephemeral python container so agents without python still work
+
           sh '''
             docker run --rm \
               -v "$WORKSPACE":/workspace \
@@ -51,7 +51,6 @@ pipeline {
     stage('Build image') {
       steps {
         script {
-          // Build and tag using EFFECTIVE_IMAGE so we push the exact name you expect
           echo "Building ${env.EFFECTIVE_IMAGE}"
           sh "docker build -t ${env.EFFECTIVE_IMAGE} ."
         }
@@ -60,7 +59,7 @@ pipeline {
 
     stage('Push to Docker Hub') {
       steps {
-        // Uses the credential id provided via env DOCKER_REGISTRY_CREDS (or 'dockerhub')
+
         script {
           def cred = env.REG_CRED_ID ?: 'dockerhub'
           echo "Logging into registry with credentials id: ${cred}"
