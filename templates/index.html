@@ -1,30 +1,127 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Simple Flask App</title>
-    <link rel="stylesheet" href="/static/style.css">
-  </head>
-  <body>
-    <header>
-      <h1>Simple Flask App</h1>
-    </header>
-    <main>
-      <p id="greeting">Hello from Flask!</p>
-      <section>
-        <h2>Health</h2>
-        <button id="check-health">Check Health</button>
-        <pre id="health-result"></pre>
-      </section>
-    </main>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uni Subjects</title>
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Uni Subjects</h1>
 
-    <script>
-      document.getElementById('check-health').addEventListener('click', async () => {
-        const res = await fetch('/health');
-        const data = await res.json();
-        document.getElementById('health-result').textContent = JSON.stringify(data, null, 2);
+    <section class="card">
+      <h2>Add Subject</h2>
+      <form id="subjectForm">
+        <div class="grid">
+          <label>
+            <span>Code</span>
+            <input id="sCode" placeholder="e.g. SWE40006" required>
+          </label>
+          <label>
+            <span>Description</span>
+            <input id="sDescription" placeholder="e.g. Software Deployment" required>
+          </label>
+        </div>
+
+        <fieldset class="radio-row">
+          <legend>Unit Type</legend>
+          <label><input type="radio" name="UnitType" value="Core" required> Core</label>
+          <label><input type="radio" name="UnitType" value="Software Development" required> Software Development</label>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit">Add Subject</button>
+          <button type="button" id="clearAll" class="secondary">Clear All</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="filters">
+      <span>Filter:</span>
+      <button class="filter-btn active" data-filter="All">All</button>
+      <button class="filter-btn" data-filter="Core">Core</button>
+      <button class="filter-btn" data-filter="Software Development">Software Development</button>
+    </section>
+
+    <section class="card">
+      <table id="subjectTable">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="footer-row">
+        <small id="totalCount">Total subjects: 0</small>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('subjectForm');
+    const tableBody = document.querySelector('#subjectTable tbody');
+    const clearBtn = document.getElementById('clearAll');
+    const totalCount = document.getElementById('totalCount');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    let subjects = [];
+    let currentFilter = 'All';
+
+    function updateTable() {
+      tableBody.innerHTML = '';
+      const filtered = currentFilter === 'All'
+        ? subjects
+        : subjects.filter(s => s.UnitType === currentFilter);
+
+      filtered.forEach((s, i) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${s.sCode}</td>
+          <td>${s.sDescription}</td>
+          <td>${s.UnitType}</td>
+          <td class="right"><button class="danger" onclick="deleteSubject(${i})">Remove</button></td>
+        `;
+        tableBody.appendChild(row);
       });
-    </script>
-  </body>
+      totalCount.textContent = `Total subjects: ${subjects.length}`;
+    }
+
+    function deleteSubject(index) {
+      subjects.splice(index, 1);
+      updateTable();
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const sCode = document.getElementById('sCode').value.trim();
+      const sDescription = document.getElementById('sDescription').value.trim();
+      const unitType = form.UnitType.value;
+
+      if (sCode && sDescription && unitType) {
+        subjects.push({ sCode, sDescription, UnitType: unitType });
+        form.reset();
+        updateTable();
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      subjects = [];
+      updateTable();
+    });
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        updateTable();
+      });
+    });
+  </script>
+</body>
 </html>

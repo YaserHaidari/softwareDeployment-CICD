@@ -1,11 +1,12 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 
 def create_app():
     app = Flask(__name__)
 
     @app.route('/')
     def index():
-        return jsonify({"message": "Hello from love!"}), 200
+        # Render the HTML UI from templates/index.html
+        return render_template('index.html')
 
     @app.route('/health')
     def health():
