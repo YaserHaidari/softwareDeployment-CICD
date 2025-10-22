@@ -36,13 +36,14 @@ pipeline {
     stage('Lint') {
       steps {
         script {
-          echo 'Running lint (flake8)'
+          echo 'Running lint (flake8) inside python container'
+          // Run lint inside an ephemeral python container so agents without python still work
           sh '''
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt || true
-            pip install flake8
-            # Run flake8 and fail the stage if any issues are found
-            flake8 --max-line-length=120 || (echo 'FLAKE8 found issues' && exit 1)
+            docker run --rm \
+              -v "$WORKSPACE":/workspace \
+              -w /workspace \
+              python:3.12-slim \
+              /bin/sh -c "python -m pip install --upgrade pip && pip install -r requirements.txt || true && pip install flake8 && flake8 --max-line-length=120"
           '''
         }
       }
