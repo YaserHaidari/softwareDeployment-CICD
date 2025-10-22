@@ -33,6 +33,20 @@ pipeline {
         }
       }
     }
+    stage('Lint') {
+      steps {
+        script {
+          echo 'Running lint (flake8)'
+          sh '''
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt || true
+            pip install flake8
+            # Run flake8 and fail the stage if any issues are found
+            flake8 --max-line-length=120 || (echo 'FLAKE8 found issues' && exit 1)
+          '''
+        }
+      }
+    }
     stage('Build image') {
       steps {
         script {
