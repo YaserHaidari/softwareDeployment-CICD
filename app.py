@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template
 
+
 def create_app():
     app = Flask(__name__)
 
@@ -13,6 +14,7 @@ def create_app():
         return jsonify({"status": "ok"}), 200
 
     return app
+
 
 if __name__ == '__main__':
     create_app().run(host='0.0.0.0', port=5000, debug=True)
